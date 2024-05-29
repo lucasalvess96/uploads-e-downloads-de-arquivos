@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,9 +38,6 @@ class FileUploadServiceTest {
     @Mock
     MultipartFile mockFile;
 
-    @Mock
-    private Path mockPath;
-
     @InjectMocks
     private FileUploadService fileUploadServiceMock;
 
@@ -48,7 +48,7 @@ class FileUploadServiceTest {
     }
 
     @Test
-    @DisplayName("Should return method init")
+    @DisplayName("Should return method init success")
     void createUploadDirectory() {
         assertDoesNotThrow(() -> fileUploadServiceMock.init());
         Path uploadDirPath = Paths.get(uploadDir);
@@ -57,14 +57,15 @@ class FileUploadServiceTest {
     }
 
     @Test
-    void testInit_CouldNotCreateUploadDirectory() {
-        when(uploadDir).thenReturn("/diretorio/inexistente");
-        ErroRequest exception = assertThrows(ErroRequest.class, () -> {
-            fileUploadServiceMock.init();
-        });
-        String mensagemEsperada = "Could not create upload directory!";
-        assertTrue(exception.getMessage().contains(mensagemEsperada));
-        assertInstanceOf(IOException.class, exception.getCause());
+    @DisplayName("Should handle the exception and show mensage ErroRequest")
+    void couldNotCreateUploadDirectory() {
+        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
+            mockedFiles.when(() -> Files.createDirectories(any(Path.class))).thenThrow(IOException.class);
+            ErroRequest exception = assertThrows(ErroRequest.class, () -> fileUploadServiceMock.init());
+            String mensagemEsperada = "Could not create upload directory!";
+            assertTrue(exception.getMessage().contains(mensagemEsperada));
+            assertInstanceOf(IOException.class, exception.getCause());
+        }
     }
 
     @Test
