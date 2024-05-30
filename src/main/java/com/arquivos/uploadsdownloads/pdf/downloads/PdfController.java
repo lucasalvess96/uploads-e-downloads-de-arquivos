@@ -19,7 +19,7 @@ public class PdfController {
     }
 
     @PostMapping("/download")
-    public ResponseEntity<String> uploadPdf(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> downloadPdf(@RequestParam("file") MultipartFile file) {
         try {
             String downloadedFileName = pdfService.generatedPDF(file);
             if (downloadedFileName != null) {
