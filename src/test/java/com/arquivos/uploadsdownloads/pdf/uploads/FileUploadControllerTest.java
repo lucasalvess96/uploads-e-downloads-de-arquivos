@@ -25,7 +25,7 @@ class FileUploadControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("Should return PDF success")
+    @DisplayName("Should return Upload success")
     void handlePdfUploadSuccess() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf",
                 MediaType.APPLICATION_PDF_VALUE, "Test PDF Content".getBytes());
